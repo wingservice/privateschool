@@ -1,21 +1,12 @@
+// ============================================================================
+// GOOGLE APPS SCRIPT CODE
+// ============================================================================
+// 1. Create a new Google Sheet.
+// 2. Extensions > Apps Script.
+// 3. Paste this code into Code.gs.
+// 4. Save and Deploy as Web App (Execute as: Me, Who has access: Anyone).
+// ============================================================================
 
-# School Data Collection App
-
-A responsive, voice-enabled web application for collecting school statistics and saving documents to Google Drive.
-
-## 🚀 Deployment Guide (100% Free Method)
-
-Follow these steps to deploy this app using **Netlify** (Frontend) and **Google Sheets + Drive** (Backend).
-
-### Phase 1: Database Setup (Google Sheets & Apps Script)
-
-1.  Create a new **Google Sheet**.
-2.  Rename the bottom tab to **`Sheet1`** (Exact case matters).
-3.  Copy the **Headers** listed at the bottom of this file and paste them into **Row 1**.
-4.  Click `Extensions` > `Apps Script`.
-5.  Delete any code in `Code.gs` and paste the script below:
-
-```javascript
 const SHEET_NAME = "Sheet1";
 const UPLOAD_FOLDER_NAME = "School_Registration_Documents";
 
@@ -29,11 +20,26 @@ function doPost(e) {
     if (!sheet) {
       // Create sheet if missing
       sheet = doc.insertSheet(SHEET_NAME);
+      // Set Header Row
       sheet.appendRow([
-        'Timestamp', 'School Name', 'UDISE Code', 'Block', 'District', 'Level', 
-        'Principal Name', 'Name of Society/Trust', 'Phone', 'Email', 
-        'School Picture', 'Principal Picture', 'Registration Certificate Primary', 'Registration Certificate Upper Primary'
+        'Timestamp', 
+        'School Name', 
+        'UDISE Code', 
+        'Block', 
+        'District', 
+        'Level', 
+        'Principal Name', 
+        'Name of Society/Trust', 
+        'Phone', 
+        'Email', 
+        'School Picture', 
+        'Principal Picture', 
+        'Registration Certificate Primary', 
+        'Registration Certificate Upper Primary'
       ]);
+      // Formatting header
+      sheet.getRange(1, 1, 1, 14).setFontWeight("bold").setBackground("#e0e0e0");
+      sheet.setFrozenRows(1);
     }
 
     const rawData = e.postData.contents;
@@ -57,12 +63,14 @@ function doPost(e) {
         const extension = contentType.split('/')[1];
 
         // Create Blob
-        const blob = Utilities.newBlob(Utilities.base64Decode(base64), contentType, `${fileNamePrefix}_${jsonData.udiseCode}.${extension}`);
+        // Filename: Type_UDISE_Timestamp
+        const fileName = `${fileNamePrefix}_${jsonData.udiseCode || 'Unknown'}_${Date.now()}.${extension}`;
+        const blob = Utilities.newBlob(Utilities.base64Decode(base64), contentType, fileName);
         
         // Save to Drive
         const file = folder.createFile(blob);
         
-        // Make public (Optional - enables viewing without login, remove if strict privacy needed)
+        // Make public (Optional - allows the link to work for anyone with the link)
         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         
         return file.getUrl();
@@ -72,6 +80,7 @@ function doPost(e) {
     };
 
     // 3. Process Uploads
+    // These match the field names in your frontend `SchoolData` interface
     const schoolPicUrl = processFile(jsonData.schoolPicture, "SchoolPic");
     const principalPicUrl = processFile(jsonData.principalPicture, "PrincipalPic");
     const certPrimaryUrl = processFile(jsonData.registrationCertificatePrimary, "Cert_Primary");
@@ -87,7 +96,8 @@ function doPost(e) {
       jsonData.level || '',
       jsonData.principalName || '',
       jsonData.societyTrustName || '',
-      "'"+(jsonData.phone || ''), // Quote to force string format for phone numbers
+      // Force phone to string to prevent scientific notation or dropping leading zeros
+      "'"+(jsonData.phone || ''), 
       jsonData.email || '',
       schoolPicUrl,
       principalPicUrl,
@@ -121,40 +131,3 @@ function getOrCreateFolder(folderName) {
     return DriveApp.createFolder(folderName);
   }
 }
-```
-
-6.  **Deploy the Script**:
-    *   Click the blue **Deploy** button > **New deployment**.
-    *   Select type: **Web app**.
-    *   Description: `v1`
-    *   Execute as: **Me** (your email).
-    *   **Who has access: Anyone** (Crucial! Otherwise the app cannot post data).
-    *   Click **Deploy**.
-    *   (You may be asked to "Authorize Access". Click "Review permissions", choose your account, click "Advanced", and "Go to (Project Name) (unsafe)" to allow it. This is normal for custom scripts).
-    *   **Copy the Web App URL**.
-
-### Phase 2: Link Frontend
-
-1.  Open `services/api.ts` in your code.
-2.  Paste the Web App URL into the `API_URL` constant variable.
-
-### Phase 3: Deploy Frontend (Netlify)
-
-1.  Push your code to **GitHub**.
-2.  Log in to [Netlify](https://www.netlify.com/).
-3.  Click **Add new site** > **Import from existing project** > **GitHub**.
-4.  Select your repo.
-5.  **Build Settings**:
-    *   Build command: `npm run build`
-    *   Publish directory: `dist`
-6.  **Environment Variables** (For Voice Features):
-    *   Click **Add environment variables**.
-    *   Key: `API_KEY`
-    *   Value: *Your Google Gemini API Key*.
-7.  Click **Deploy Site**.
-
----
-
-## Google Sheet Headers (Row 1)
-
-Timestamp, School Name, UDISE Code, Block, District, Level, Principal Name, Name of Society/Trust, Phone, Email, School Picture, Principal Picture, Registration Certificate Primary, Registration Certificate Upper Primary

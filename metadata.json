@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Copy of School Data Collection",
+  "description": "A responsive, accessible React application for collecting school data and submitting it to a backend service for Google Sheets storage.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
