@@ -14,6 +14,7 @@ interface Message {
   image?: string; // Base64 data URL
 }
 
+// Local interface for audio blob data
 interface AudioData {
   data: string;
   mimeType: string;

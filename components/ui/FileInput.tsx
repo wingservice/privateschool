@@ -32,8 +32,9 @@ export const FileInput: React.FC<FileInputProps> = ({
 
   const processFile = (file: File | undefined) => {
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { // 2MB Limit check
-        alert("File size exceeds 2MB. Please upload a smaller file.");
+      // Updated limit: 10MB check
+      if (file.size > 10 * 1024 * 1024) { 
+        alert("File size exceeds 10MB. Please upload a smaller file.");
         return;
       }
 
@@ -152,7 +153,7 @@ export const FileInput: React.FC<FileInputProps> = ({
               {capture ? "Using your camera" : "or drag and drop here"}
             </p>
             <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-wide font-bold">
-              {isPDF ? "PDF (Max 2MB)" : "IMG (Max 2MB)"}
+              {isPDF ? "PDF (Max 10MB)" : "IMG (Max 10MB)"}
             </p>
           </div>
         )}

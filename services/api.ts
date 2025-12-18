@@ -28,9 +28,9 @@ export const submitSchoolData = async (data: SchoolData): Promise<ApiResponse> =
       };
   }
 
-  // 2. Timeout setup (60 seconds) to allow time for file uploads to Drive
+  // 2. Timeout setup (120 seconds) to allow time for 10MB file uploads to Drive
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000);
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
     const isGoogleAppsScript = API_URL.includes('script.google.com');
